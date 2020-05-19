@@ -1,4 +1,4 @@
-# Networking an Distributed Systems | Assignment 3
+# Redes y Sistemas Distribuidos | Entregable 3
 
 This repository contains the code and report which is done for a introduction into the 2nd layer of internet protocols and how it's made. 
 
