@@ -136,12 +136,10 @@ void ClientConnection::WaitForRequests()
         }
         else if (COMMAND("PWD"))
         {
-            printf("(PWD): SHOW\n");
-
             char path[MAX_BUFF];
 
             if (getcwd(path, sizeof(path)) != NULL)
-                fprintf(fd, "257 \"%s\" \n", path);
+                fprintf(fd, "257 Working Directory: \"%s\" \n", path);
         }
         else if (COMMAND("CWD"))
         {
