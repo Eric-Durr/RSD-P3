@@ -34,6 +34,23 @@ private:
     bool quit;
     bool p_mode;
     unsigned long server_addr;
+
+
+    //Commands private functions
+
+    void UserCommand(FILE* &fd, char arg[MAX_BUFF]);
+    void PassCommand(FILE* &fd, char arg[MAX_BUFF]);
+    void PwdCommand(FILE* &fd, char arg[MAX_BUFF]);
+    void CwdCommand(FILE* &fd, char arg[MAX_BUFF]);
+    void PortCommand(FILE* &fd, char arg[MAX_BUFF]);
+    void PasvCommand(FILE* &fd, char arg[MAX_BUFF]);
+    void StorCommand(FILE* &fd, char arg[MAX_BUFF]);
+    void RetrCommand(FILE* &fd, char arg[MAX_BUFF]);
+    void ListCommand(FILE* &fd, char arg[MAX_BUFF]);
+    void SystCommand(FILE* &fd, char arg[MAX_BUFF]);
+    void TypeCommand(FILE* &fd, char arg[MAX_BUFF]);
+    void QuitCommand(FILE* &fd, char arg[MAX_BUFF]);
+
 };
 
 #endif

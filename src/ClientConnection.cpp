@@ -33,6 +33,7 @@
 
 #include "ClientConnection.h"
 
+
 ClientConnection::ClientConnection(int s, unsigned long addr)
 {
     int sock = (int)(s);
@@ -119,192 +120,46 @@ void ClientConnection::WaitForRequests()
 
         if (COMMAND("USER"))
         {
-            fscanf(fd, "%s", arg);
-            printf("USER: %s\n", arg);
-
-            fprintf(fd, "331 User name ok, need password\n");
+            UserCommand(fd, arg);
         }
 
         else if (COMMAND("PASS"))
         {
-            fscanf(fd, "%s", arg);
-            printf("PASS: %s\n", arg);
-            
-            
-            if (strcmp(arg, "1234") == 0)
-            {
-                fprintf(fd, "230 User logged in\n");
-            }
-            else
-            {
-                fprintf(fd, "530 Not logged in.\n");
-                quit = true;
-            }
+            PassCommand(fd, arg);
         }
+
         else if (COMMAND("PWD"))
         {
-            printf("PWD: show directory in client\n");
-            char path[MAX_BUFF];
-
-            if (getcwd(path, sizeof(path)) != NULL)
-                fprintf(fd, "257 Working Directory: \"%s\" \n", path);
+            PwdCommand(fd, arg);
         }
+
         else if (COMMAND("CWD"))
         {
-            fscanf(fd, "%s", arg);
-            printf("CWD: changing to %s\n", arg);
-
-            char path[MAX_BUFF];
-
-            if (getcwd(path, sizeof(path)) != NULL) // getcwd gets current path
-            {
-                strcat(path, "/"); // Prints path in the standard output
-                strcat(path, arg);
-
-                if (chdir(path) < 0) // Checks if directory can be changed
-                    fprintf(fd, "550 Fail, can´t change directory.\n");
-                else
-                    fprintf(fd, "250 Success, directory changed.\n");
-            }
+            CwdCommand(fd, arg);   
         }
 
         else if (COMMAND("PORT"))
         {
-
-            printf("PORT: activated port command\n");
-            p_mode = false;
-
-            unsigned int ip[4];
-            unsigned int port[2];
-
-            fscanf(fd, "%d, %d, %d, %d, %d, %d", &ip[0], &ip[1], &ip[2], &ip[3], &port[0], &port[1]);
-
-            uint32_t ip_addr = ip[3] << 24 | ip[2] << 16 | ip[1] << 8 | ip[0];
-            uint16_t port_v = port[0] << 8 | port[1];
-
-            data_socket = connect_TCP(ip_addr, port_v);
-
-            fprintf(fd, "200 Ok\n");
+            PortCommand(fd, arg);
         }
 
         /*Passive mode switch command: */
         else if (COMMAND("PASV"))
-        {
-           
-            printf("PASV: activated passive command\n");
-            p_mode = true;
-
-            struct sockaddr_in sin, sa;
-            socklen_t sa_len = sizeof(sa);
-            int sFD;
-
-            sFD = socket(AF_INET, SOCK_STREAM, 0);
-
-            if (sFD<0)
-                errexit("Unable to create socket: %s\n", strerror(errno));
-
-            memset(&sin, 0, sizeof(sin));
-            sin.sin_family = AF_INET;
-            sin.sin_addr.s_addr = server_addr;
-            sin.sin_port = 0;
-
-            if (bind(sFD, (struct sockaddr*)&sin, sizeof(sin)) < 0)
-                errexit("Unable to bind socket: %s\n", strerror(errno));
-
-            if (listen(sFD,5) < 0)
-                errexit("Unable to listen: %s\n", strerror(errno));
-
-            getsockname(sFD, (struct sockaddr *)&sa, &sa_len);
-
-            fprintf(fd, "227 Entering Passive Mode (%d,%d,%d,%d,%d,%d).\n",
-                (unsigned int)( server_addr & 0xff),
-                (unsigned int)((server_addr >> 8) & 0xff),
-                (unsigned int)((server_addr >> 16) & 0xff),
-                (unsigned int)((server_addr >> 24) & 0xff),
-                (unsigned int)(sa.sin_port & 0xff),
-                (unsigned int)(sa.sin_port >> 8));
-
-            data_socket = sFD;
+        {  
+            PasvCommand(fd, arg);
         }
+
         else if (COMMAND("STOR"))
         {
-            fscanf(fd, "%s", arg);
-            printf("STOR: %s\n", arg);
-
-            char Buffer[MAX_BUFF];
-            int newFile;
-            int aux;
-
-            newFile = open(arg, O_RDWR | O_CREAT, S_IRWXU);
-
-            fprintf(fd, "150 File ok, creating connection\n");
-            fflush(fd);
-
-            if (newFile < 0)
-            {
-                fprintf(fd, "450 Requested file action not taken.\n");
-                close(data_socket);
-            }
-            else
-            {
-                fflush(fd);
-                
-                struct sockaddr_in sa;
-                socklen_t sa_len = sizeof(sa);
-                char buffer[MAX_BUFF];
-                int n;
-
-                if (p_mode)
-                    data_socket = accept(data_socket,(struct sockaddr *)&sa, &sa_len);
-
-                do
-                {
-                    aux = read(data_socket, Buffer, sizeof(Buffer));
-                    write(newFile, Buffer, aux);
-                } while (aux > 0);
-
-                fprintf(fd, "250 Requested action Ok and completed.\n");
-                close(newFile);
-                close(data_socket);
-            }
+            StorCommand(fd, arg);
         }
 
         /*Retrieve files method (get)*/
         else if (COMMAND("RETR"))
         {
-            fscanf(fd, "%s", arg);
-            printf("RETR: Retrieving file %s\n", arg);
-
-            FILE* file = fopen(arg,"rb");
-
-            if (!file){
-                fprintf(fd, "450 Requested file action cancelled. File isn't available.\n");
-                close(data_socket);
-            }
-
-            else{
-
-                fprintf(fd, "150 File status okay; oppening conection.\n");
-
-                struct sockaddr_in sa;
-                socklen_t sa_len = sizeof(sa);
-                char buffer[MAX_BUFF];
-                int n;
-
-                if (p_mode)
-                    data_socket = accept(data_socket,(struct sockaddr *)&sa, &sa_len);
-
-                do{
-                    n = fread(buffer, sizeof(char), MAX_BUFF, file); 
-                    send(data_socket, buffer, n, 0);
-
-                } while (n == MAX_BUFF);
-                          
-                fprintf(fd,"226 Closing data connection.\n");
-                fclose(file);
-                close(data_socket);
-           }
+        
         }
+
         else if (COMMAND("LIST"))
         {
             printf("(LIST): Listing current directory\n");
@@ -340,6 +195,7 @@ void ClientConnection::WaitForRequests()
                 close(data_socket);
             }
         }
+
         else if (COMMAND("SYST"))
         {
             fprintf(fd, "215 UNIX Type: L8.\n");
@@ -372,3 +228,202 @@ void ClientConnection::WaitForRequests()
 
     return;
 };
+
+void ClientConnection::UserCommand(FILE* &fd, char arg[MAX_BUFF])
+{
+    fscanf(fd, "%s", arg);
+    printf("USER: %s\n", arg);
+    
+    fprintf(fd, "331 User name ok, need password\n");
+}
+
+void ClientConnection::PassCommand(FILE* &fd, char arg[MAX_BUFF])
+{
+    fscanf(fd, "%s", arg);
+    printf("PASS: %s\n", arg);
+    
+    if (strcmp(arg, "1234") == 0)
+    {
+        fprintf(fd, "230 User logged in\n");
+    }
+    else
+    {
+        fprintf(fd, "530 Not logged in.\n");
+        quit = true;
+    }
+}
+
+void ClientConnection::PwdCommand(FILE* &fd, char arg[MAX_BUFF])
+{
+    printf("PWD: show directory in client\n");
+    char path[MAX_BUFF];
+    
+    if (getcwd(path, sizeof(path)) != NULL)
+        fprintf(fd, "257 Working Directory: \"%s\" \n", path);       
+}
+
+void ClientConnection::CwdCommand(FILE* &fd, char arg[MAX_BUFF])
+{
+    fscanf(fd, "%s", arg);
+    printf("CWD: changing to %s\n", arg);
+    
+    char path[MAX_BUFF];
+    
+    if (getcwd(path, sizeof(path)) != NULL) // getcwd gets current path
+    {
+        strcat(path, "/"); // Prints path in the standard output
+        strcat(path, arg);
+    
+        if (chdir(path) < 0) // Checks if directory can be changed
+            fprintf(fd, "550 Fail, can´t change directory.\n");
+        else
+            fprintf(fd, "250 Success, directory changed.\n");
+    }
+}
+
+void ClientConnection::PortCommand(FILE* &fd, char arg[MAX_BUFF])
+{
+    
+    printf("PORT: activated port command\n");
+    p_mode = false;
+    
+    unsigned int ip[4];
+    unsigned int port[2];
+    
+    fscanf(fd, "%d, %d, %d, %d, %d, %d", &ip[0], &ip[1], &ip[2], &ip[3], &port[0], &port[1]);
+    
+    uint32_t ip_addr = ip[3] << 24 | ip[2] << 16 | ip[1] << 8 | ip[0];
+    uint16_t port_v = port[0] << 8 | port[1];
+    
+    data_socket = connect_TCP(ip_addr, port_v);
+    
+    fprintf(fd, "200 Ok\n");
+}
+
+void ClientConnection::PasvCommand(FILE* &fd, char arg[MAX_BUFF])
+{
+       printf("PASV: activated passive command\n");
+            p_mode = true;
+
+            struct sockaddr_in sin, sa;
+            socklen_t sa_len = sizeof(sa);
+            int sFD;
+
+            sFD = socket(AF_INET, SOCK_STREAM, 0);
+
+            if (sFD<0)
+                errexit("Unable to create socket: %s\n", strerror(errno));
+
+            memset(&sin, 0, sizeof(sin));
+            sin.sin_family = AF_INET;
+            sin.sin_addr.s_addr = server_addr;
+            sin.sin_port = 0;
+
+            if (bind(sFD, (struct sockaddr*)&sin, sizeof(sin)) < 0)
+                errexit("Unable to bind socket: %s\n", strerror(errno));
+
+            if (listen(sFD,5) < 0)
+                errexit("Unable to listen: %s\n", strerror(errno));
+
+            getsockname(sFD, (struct sockaddr *)&sa, &sa_len);
+
+            fprintf(fd, "227 Entering Passive Mode (%d,%d,%d,%d,%d,%d).\n",
+                (unsigned int)( server_addr & 0xff),
+                (unsigned int)((server_addr >> 8) & 0xff),
+                (unsigned int)((server_addr >> 16) & 0xff),
+                (unsigned int)((server_addr >> 24) & 0xff),
+                (unsigned int)(sa.sin_port & 0xff),
+                (unsigned int)(sa.sin_port >> 8));
+
+            data_socket = sFD;
+}
+
+void ClientConnection::StorCommand(FILE* &fd, char arg[MAX_BUFF])
+{
+        fscanf(fd, "%s", arg);
+        printf("STOR: %s\n", arg);
+        
+        char Buffer[MAX_BUFF];
+        int newFile;
+        int aux;
+        
+        newFile = open(arg, O_RDWR | O_CREAT, S_IRWXU);
+        
+        fprintf(fd, "150 File ok, creating connection\n");
+        fflush(fd);
+        
+        if (newFile < 0)
+        {
+            fprintf(fd, "450 Requested file action not taken.\n");
+            close(data_socket);
+        }
+        else
+        {
+            fflush(fd);
+            
+            struct sockaddr_in sa;
+            socklen_t sa_len = sizeof(sa);
+            char buffer[MAX_BUFF];
+            int n;
+        
+            if (p_mode)
+                data_socket = accept(data_socket,(struct sockaddr *)&sa, &sa_len);
+        
+            do
+            {
+                aux = read(data_socket, Buffer, sizeof(Buffer));
+                write(newFile, Buffer, aux);
+            } while (aux > 0);
+        
+            fprintf(fd, "250 Requested action Ok and completed.\n");
+            close(newFile);
+            close(data_socket);
+        }
+}
+
+void ClientConnection::RetrCommand(FILE* &fd, char arg[MAX_BUFF])
+{
+        fscanf(fd, "%s", arg);
+            printf("RETR: Retrieving file %s\n", arg);
+
+            FILE* file = fopen(arg,"rb");
+
+            if (!file)
+            {
+                fprintf(fd, "450 Requested file action cancelled. File isn't available.\n");
+                close(data_socket);
+            }
+
+            else
+            {
+
+                fprintf(fd, "150 File status okay; oppening conection.\n");
+
+                struct sockaddr_in sa;
+                socklen_t sa_len = sizeof(sa);
+                char buffer[MAX_BUFF];
+                int n;
+
+                if (p_mode)
+                    data_socket = accept(data_socket,(struct sockaddr *)&sa, &sa_len);
+
+                do{
+                    n = fread(buffer, sizeof(char), MAX_BUFF, file); 
+                    send(data_socket, buffer, n, 0);
+
+                } while (n == MAX_BUFF);
+                          
+                fprintf(fd,"226 Closing data connection.\n");
+                fclose(file);
+                close(data_socket);
+           }
+}
+
+//void ClientConnection::ListCommand(FILE* &fd, char arg[MAX_BUFF]);
+//
+//void ClientConnection::SystCommand(FILE* &fd, char arg[MAX_BUFF]);
+//
+//void ClientConnection::TypeCommand(FILE* &fd, char arg[MAX_BUFF]);
+//
+//void ClientConnection::QuitCommand(FILE* &fd, char arg[MAX_BUFF]);
+
