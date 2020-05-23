@@ -162,7 +162,19 @@ void ClientConnection::WaitForRequests()
 
         else if (COMMAND("PORT"))
         {
-            // To be implemented by students
+            p_mode = false;
+
+            unsigned int ip[4];
+            unsigned int port[2];
+
+            fscanf(fd, "%d, %d, %d, %d, %d, %d", &ip[0], &ip[1], &ip[2], &ip[3], &port[0], &port[1]);
+
+            uint32_t ip_addr = ip[3] << 24 | ip[2] << 16 | ip[1] << 8 | ip[0];
+            uint16_t port_v = port[0] << 8 | port[1];
+
+            data_socket = connect_TCP(ip_addr, port_v);
+
+            fprintf(fd, "200 Ok\n");
         }
         else if (COMMAND("PASV"))
         {
