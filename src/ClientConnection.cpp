@@ -33,13 +33,14 @@
 
 #include "ClientConnection.h"
 
-ClientConnection::ClientConnection(int s)
+ClientConnection::ClientConnection(int s, unsigned long addr)
 {
     int sock = (int)(s);
 
     char buffer[MAX_BUFF];
-
+    server_addr = addr;
     control_socket = s;
+
     // Check the Linux man pages to know what fdopen does.
     fd = fdopen(s, "a+");
     if (fd == NULL)
@@ -118,6 +119,7 @@ void ClientConnection::WaitForRequests()
 
         if (COMMAND("USER"))
         {
+            fscanf(fd, "%s", arg);
             printf("USER: %s\n", arg);
 
             fprintf(fd, "331 User name ok, need password\n");
@@ -126,6 +128,9 @@ void ClientConnection::WaitForRequests()
         else if (COMMAND("PASS"))
         {
             fscanf(fd, "%s", arg);
+            printf("PASS: %s\n", arg);
+            
+            
             if (strcmp(arg, "1234") == 0)
             {
                 fprintf(fd, "230 User logged in\n");
@@ -165,6 +170,8 @@ void ClientConnection::WaitForRequests()
 
         else if (COMMAND("PORT"))
         {
+
+            printf("PASV: activated port command\n");
             p_mode = false;
 
             unsigned int ip[4];
@@ -179,13 +186,43 @@ void ClientConnection::WaitForRequests()
 
             fprintf(fd, "200 Ok\n");
         }
+
+        /*Passive mode switch command: */
         else if (COMMAND("PASV"))
         {
-            
+            printf("PASV: activated passive command\n");
+            p_mode = true;
+
+            struct sockaddr_in sin, sa;
+            socklen_t sa_len = sizeof(sa);
+            int sFD;
+
+            if ((sFD = socket(AF_INET, SOCK_STREAM, 0)) < 0)
+                errexit("Unable to create socket: %s\n", strerror(errno));
+
+            memset(&sin, 0, sizeof(sin));
+            sin.sin_family = AF_INET;
+            sin.sin_addr.s_addr = server_addr;
+            sin.sin_port = 0;
+
+            if (bind(sFD, (struct sockaddr *) &sin, sizeof(sin)) < 0)
+                errexit("Unable to bind socket with port: %s.\n", strerror(errno));
+
+            if (listen(sFD, 5) < 0)
+                errexit("Unable to listen: %s\n", strerror(errno));
+
+            getsockname(sFD, (struct sockaddr *) &sa, &sa_len);
+
+            fprintf(fd, "277 changed to Passive Mode");
+
+            data_socket = sFD;
+
         }
         else if (COMMAND("STOR"))
         {
             fscanf(fd, "%s", arg);
+            printf("STOR: %s\n", arg);
+
             char Buffer[MAX_BUFF];
             int newFile;
             int aux;
@@ -243,8 +280,8 @@ void ClientConnection::WaitForRequests()
         {
             fprintf(fd, "502 Command not implemented.\n");
             fflush(fd);
-            printf("Comando : %s %s\n", command, arg);
-            printf("Error interno del servidor\n");
+            printf("Command : %s %s\n", command, arg);
+            printf("Internal server error\n");
         }
     }
 
