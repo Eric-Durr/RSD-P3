@@ -136,17 +136,15 @@ void ClientConnection::WaitForRequests()
         }
         else if (COMMAND("PWD"))
         {
-            printf("(PWD): SHOW\n");
-
             char path[MAX_BUFF];
 
             if (getcwd(path, sizeof(path)) != NULL)
-                fprintf(fd, "257 \"%s\" \n", path);
+                fprintf(fd, "257 Working Directory: \"%s\" \n", path);
         }
         else if (COMMAND("CWD"))
         {
             fscanf(fd, "%s", arg);
-            printf("(CWD):%s\n", arg);
+            printf("Command CWD recieved: %s as argument.\n", arg);
 
             char path[MAX_BUFF];
 
@@ -156,9 +154,9 @@ void ClientConnection::WaitForRequests()
                 strcat(path, arg);
 
                 if (chdir(path) < 0) // Checks if directory can be changed
-                    fprintf(fd, "550, failed to change directory.\n");
+                    fprintf(fd, "550 Fail, can´t change directory.\n");
                 else
-                    fprintf(fd, "250, changed directoy succesfully.\n");
+                    fprintf(fd, "250 Success, directory changed.\n");
             }
         }
 
