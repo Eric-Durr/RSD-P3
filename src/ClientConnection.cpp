@@ -54,7 +54,7 @@ ClientConnection::ClientConnection(int s)
 
     ok = true;
     data_socket = -1;
-    parar = false;
+    quit = false;
 };
 
 ClientConnection::~ClientConnection()
@@ -91,7 +91,7 @@ void ClientConnection::stop()
 {
     close(data_socket);
     close(control_socket);
-    parar = true;
+    quit = true;
 }
 
 #define COMMAND(cmd) strcmp(command, cmd) == 0
@@ -111,7 +111,7 @@ void ClientConnection::WaitForRequests()
 
     fprintf(fd, "220 Service ready\n");
 
-    while (!parar)
+    while (!quit)
     {
 
         fscanf(fd, "%s", command);
@@ -133,7 +133,7 @@ void ClientConnection::WaitForRequests()
             else
             {
                 fprintf(fd, "530 Not logged in.\n");
-                parar = true;
+                quit = true;
             }
         }
         else if (COMMAND("PORT"))
@@ -171,7 +171,7 @@ void ClientConnection::WaitForRequests()
         {
             fprintf(fd, "221 Service closing control connection. Logged out if appropriate.\n");
             close(data_socket);
-            parar = true;
+            quit = true;
             break;
         }
 
