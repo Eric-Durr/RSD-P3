@@ -91,7 +91,7 @@ void FTPServer::run()
         if (ssock < 0)
             errexit("Fallo en el accept: %s\n", strerror(errno));
 
-        ClientConnection *connection = new ClientConnection(ssock);
+        ClientConnection *connection = new ClientConnection(ssock, fsin.sin_addr.s_addr);
 
         // Here a thread is created in order to process multiple
         // requests simultaneously

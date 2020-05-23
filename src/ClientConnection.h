@@ -11,7 +11,7 @@ const int MAX_BUFF = 1000;
 class ClientConnection
 {
 public:
-    ClientConnection(int s);
+    ClientConnection(int s, unsigned long addr);
     ~ClientConnection();
 
     void WaitForRequests();
@@ -30,8 +30,10 @@ private:
 
     int data_socket;    // Data socket descriptor;
     int control_socket; // Control socket descriptor;
+    
     bool quit;
     bool p_mode;
+    unsigned long server_addr;
 };
 
 #endif
