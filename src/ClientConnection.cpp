@@ -186,6 +186,7 @@ void ClientConnection::WaitForRequests()
         else if (COMMAND("STOR"))
         {
             fscanf(fd, "%s", arg);
+
             char Buffer[MAX_BUFF];
             int newFile;
             int aux;
@@ -211,6 +212,7 @@ void ClientConnection::WaitForRequests()
 
                 if (p_mode)
                     data_socket = accept(data_socket,(struct sockaddr *)&sa, &sa_len);
+
                 do
                 {
                     aux = read(data_socket, Buffer, sizeof(Buffer));
@@ -222,6 +224,8 @@ void ClientConnection::WaitForRequests()
                 close(data_socket);
             }
         }
+
+        /*Retrieve files method (get)*/
         else if (COMMAND("RETR"))
         {
             fscanf(fd, "%s", arg);
