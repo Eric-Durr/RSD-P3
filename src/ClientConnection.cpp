@@ -54,7 +54,7 @@ ClientConnection::ClientConnection(int s)
 
     ok = true;
     data_socket = -1;
-    parar = false;
+    quit = false;
 };
 
 ClientConnection::~ClientConnection()
@@ -91,7 +91,7 @@ void ClientConnection::stop()
 {
     close(data_socket);
     close(control_socket);
-    parar = true;
+    quit = true;
 }
 
 #define COMMAND(cmd) strcmp(command, cmd) == 0
@@ -111,7 +111,7 @@ void ClientConnection::WaitForRequests()
 
     fprintf(fd, "220 Service ready\n");
 
-    while (!parar)
+    while (!quit)
     {
 
         fscanf(fd, "%s", command);
@@ -120,9 +120,7 @@ void ClientConnection::WaitForRequests()
             fscanf(fd, "%s", arg);
             fprintf(fd, "331 User name ok, need password\n");
         }
-        else if (COMMAND("PWD"))
-        {
-        }
+
         else if (COMMAND("PASS"))
         {
             fscanf(fd, "%s", arg);
@@ -133,7 +131,34 @@ void ClientConnection::WaitForRequests()
             else
             {
                 fprintf(fd, "530 Not logged in.\n");
-                parar = true;
+                quit = true;
+            }
+        }
+        else if (COMMAND("PWD"))
+        {
+            printf("(PWD): SHOW\n");
+
+            char path[MAX_BUFF];
+
+            if (getcwd(path, sizeof(path)) != NULL)
+                fprintf(fd, "257 \"%s\" \n", path);
+        }
+        else if (COMMAND("CWD"))
+        {
+            fscanf(fd, "%s", command);
+            printf("(CWD):%s\n", arg);
+
+            char path[MAX_BUFF];
+
+            if (getcwd(path, sizeof(path)) != NULL) // getcwd gets current path
+            {
+                strcat(path, "/"); // Prints path in the standard output
+                strcat(path, arg);
+
+                if (chdir(path) < 0) // Checks if directory can be changed
+                    fprintf(fd, "550, failed to change directory.\n");
+                else
+                    fprintf(fd, "250, changed directoy succesfully.\n");
             }
         }
         else if (COMMAND("PORT"))
@@ -171,7 +196,7 @@ void ClientConnection::WaitForRequests()
         {
             fprintf(fd, "221 Service closing control connection. Logged out if appropriate.\n");
             close(data_socket);
-            parar = true;
+            quit = true;
             break;
         }
 
