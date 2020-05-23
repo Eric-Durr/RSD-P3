@@ -31,6 +31,7 @@ private:
     int data_socket;    // Data socket descriptor;
     int control_socket; // Control socket descriptor;
     bool quit;
+    bool p_mode;
 };
 
 #endif
