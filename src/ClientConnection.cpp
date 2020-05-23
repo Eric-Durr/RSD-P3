@@ -145,7 +145,7 @@ void ClientConnection::WaitForRequests()
         }
         else if (COMMAND("CWD"))
         {
-            fscanf(fd, "%s", command);
+            fscanf(fd, "%s", arg);
             printf("(CWD):%s\n", arg);
 
             char path[MAX_BUFF];
@@ -161,6 +161,7 @@ void ClientConnection::WaitForRequests()
                     fprintf(fd, "250, changed directoy succesfully.\n");
             }
         }
+
         else if (COMMAND("PORT"))
         {
             // To be implemented by students
