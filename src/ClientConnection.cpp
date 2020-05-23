@@ -197,10 +197,20 @@ void ClientConnection::WaitForRequests()
 
             if (newFile < 0)
             {
-                fprintf(fd, "450 Requested action not taken.\n");
+                fprintf(fd, "450 Requested file action not taken.\n");
+                close(data_socket);
             }
             else
             {
+                fflush(fd);
+                
+                struct sockaddr_in sa;
+                socklen_t sa_len = sizeof(sa);
+                char buffer[MAX_BUFF];
+                int n;
+
+                if (p_mode)
+                    data_socket = accept(data_socket,(struct sockaddr *)&sa, &sa_len);
                 do
                 {
                     aux = read(data_socket, Buffer, sizeof(Buffer));
@@ -214,7 +224,38 @@ void ClientConnection::WaitForRequests()
         }
         else if (COMMAND("RETR"))
         {
-            // To be implemented by students
+            fscanf(fd, "%s", arg);
+            printf("RETR: Retrieving file %s\n", arg);
+
+            FILE* file = fopen(arg,"rb");
+
+            if (!file){
+                fprintf(fd, "450 Requested file action cancelled. File isn't available.\n");
+                close(data_socket);
+            }
+
+            else{
+
+                fprintf(fd, "150 File status okay; oppening conection.\n");
+
+                struct sockaddr_in sa;
+                socklen_t sa_len = sizeof(sa);
+                char buffer[MAX_BUFF];
+                int n;
+
+                if (p_mode)
+                    data_socket = accept(data_socket,(struct sockaddr *)&sa, &sa_len);
+
+                do{
+                    n = fread(buffer, sizeof(char), MAX_BUFF, file); 
+                    send(data_socket, buffer, n, 0);
+
+                } while (n == MAX_BUFF);
+                          
+                fprintf(fd,"226 Closing data connection.\n");
+                fclose(file);
+                close(data_socket);
+           }
         }
         else if (COMMAND("LIST"))
         {
