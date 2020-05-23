@@ -157,47 +157,17 @@ void ClientConnection::WaitForRequests()
         /*Retrieve files method (get)*/
         else if (COMMAND("RETR"))
         {
-        
+            RetrCommand(fd, arg);
         }
 
         else if (COMMAND("LIST"))
         {
-            printf("(LIST): Listing current directory\n");
-            fprintf(fd, "125 Data connection already open.\n");
-
-            struct sockaddr_in sa;
-            socklen_t sa_len = sizeof(sa);
-            char buffer[MAX_BUFF];
-            std::string list_str;
-
-            FILE* file = popen("ls", "r");
-
-            if (!file)
-            {
-                fprintf(fd, "450 Requested proccess stoped.\n");
-                close(data_socket);
-            }
-
-            else
-            {
-
-                if (p_mode)
-                    data_socket = accept(data_socket,(struct sockaddr *)&sa, &sa_len);
-
-                while (!feof(file))
-                    if (fgets(buffer, MAX_BUFF, file) != NULL) 
-                        list_str.append(buffer);
-
-                send(data_socket, list_str.c_str(), list_str.size(), 0);
-
-                fprintf(fd, "250 Closing data connection.\n");
-                pclose(file);
-                close(data_socket);
-            }
+        
         }
 
         else if (COMMAND("SYST"))
         {
+            printf("SYST: acivated syst command \n");
             fprintf(fd, "215 UNIX Type: L8.\n");
         }
 
@@ -228,6 +198,10 @@ void ClientConnection::WaitForRequests()
 
     return;
 };
+
+
+
+///// Commands private
 
 void ClientConnection::UserCommand(FILE* &fd, char arg[MAX_BUFF])
 {
@@ -384,46 +358,76 @@ void ClientConnection::StorCommand(FILE* &fd, char arg[MAX_BUFF])
 void ClientConnection::RetrCommand(FILE* &fd, char arg[MAX_BUFF])
 {
         fscanf(fd, "%s", arg);
-            printf("RETR: Retrieving file %s\n", arg);
-
-            FILE* file = fopen(arg,"rb");
-
-            if (!file)
+        printf("RETR: Retrieving file %s\n", arg);
+        
+        FILE* file = fopen(arg,"rb");
+        
+        if (!file)
+        {
+            fprintf(fd, "450 Requested file action cancelled. File isn't available.\n");
+            close(data_socket);
+        }
+        
+        else
+        {
+        
+            fprintf(fd, "150 File status okay; oppening conection.\n");
+        
+            struct sockaddr_in sa;
+            socklen_t sa_len = sizeof(sa);
+            char buffer[MAX_BUFF];
+            int n;
+        
+            if (p_mode)
+                data_socket = accept(data_socket,(struct sockaddr *)&sa, &sa_len);
+        
+            do
             {
-                fprintf(fd, "450 Requested file action cancelled. File isn't available.\n");
-                close(data_socket);
-            }
-
-            else
-            {
-
-                fprintf(fd, "150 File status okay; oppening conection.\n");
-
-                struct sockaddr_in sa;
-                socklen_t sa_len = sizeof(sa);
-                char buffer[MAX_BUFF];
-                int n;
-
-                if (p_mode)
-                    data_socket = accept(data_socket,(struct sockaddr *)&sa, &sa_len);
-
-                do{
-                    n = fread(buffer, sizeof(char), MAX_BUFF, file); 
-                    send(data_socket, buffer, n, 0);
-
-                } while (n == MAX_BUFF);
-                          
-                fprintf(fd,"226 Closing data connection.\n");
-                fclose(file);
-                close(data_socket);
-           }
+                n = fread(buffer, sizeof(char), MAX_BUFF, file); 
+                send(data_socket, buffer, n, 0);
+        
+            } while (n == MAX_BUFF);
+                    
+            fprintf(fd,"226 Closing data connection.\n");
+            fclose(file);
+            close(data_socket);
+        }
 }
 
-//void ClientConnection::ListCommand(FILE* &fd, char arg[MAX_BUFF]);
-//
-//void ClientConnection::SystCommand(FILE* &fd, char arg[MAX_BUFF]);
-//
-//void ClientConnection::TypeCommand(FILE* &fd, char arg[MAX_BUFF]);
-//
-//void ClientConnection::QuitCommand(FILE* &fd, char arg[MAX_BUFF]);
+void ClientConnection::ListCommand(FILE* &fd, char arg[MAX_BUFF])
+{
+        printf("(LIST): Listing current directory\n");
+        fprintf(fd, "125 Data connection already open.\n");
+        
+        struct sockaddr_in sa;
+        socklen_t sa_len = sizeof(sa);
+        char buffer[MAX_BUFF];
+        std::string list_str;
+        
+        FILE* file = popen("ls", "r");
+        
+        if (!file)
+        {
+            fprintf(fd, "450 Requested proccess stoped.\n");
+            close(data_socket);
+        }
+        
+        else
+        {
+        
+            if (p_mode)
+                data_socket = accept(data_socket,(struct sockaddr *)&sa, &sa_len);
+        
+            while (!feof(file))
+                if (fgets(buffer, MAX_BUFF, file) != NULL) 
+                    list_str.append(buffer);
+        
+            send(data_socket, list_str.c_str(), list_str.size(), 0);
+        
+            fprintf(fd, "250 Closing data connection.\n");
+            pclose(file);
+            close(data_socket);
+        }
+}
+
 

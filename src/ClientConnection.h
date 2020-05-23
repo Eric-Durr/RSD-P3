@@ -47,9 +47,6 @@ private:
     void StorCommand(FILE* &fd, char arg[MAX_BUFF]);
     void RetrCommand(FILE* &fd, char arg[MAX_BUFF]);
     void ListCommand(FILE* &fd, char arg[MAX_BUFF]);
-    void SystCommand(FILE* &fd, char arg[MAX_BUFF]);
-    void TypeCommand(FILE* &fd, char arg[MAX_BUFF]);
-    void QuitCommand(FILE* &fd, char arg[MAX_BUFF]);
 
 };
 
