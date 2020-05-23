@@ -182,7 +182,32 @@ void ClientConnection::WaitForRequests()
         }
         else if (COMMAND("STOR"))
         {
-            // To be implemented by students
+            fscanf(fd, "%s", arg);
+            char Buffer[MAX_BUFF];
+            int newFile;
+            int aux;
+
+            newFile = open(arg, O_RDWR | O_CREAT, S_IRWXU);
+
+            fprintf(fd, "150 File ok, creating connection\n");
+            fflush(fd);
+
+            if (newFile < 0)
+            {
+                fprintf(fd, "450 Requested action not taken.\n");
+            }
+            else
+            {
+                do
+                {
+                    aux = read(data_socket, Buffer, sizeof(Buffer));
+                    write(newFile, Buffer, aux);
+                } while (aux > 0);
+
+                fprintf(fd, "250 Requested action Ok and completed.\n");
+                close(newFile);
+                close(data_socket);
+            }
         }
         else if (COMMAND("RETR"))
         {
