@@ -120,9 +120,25 @@ void ClientConnection::WaitForRequests()
             fscanf(fd, "%s", arg);
             fprintf(fd, "331 User name ok, need password\n");
         }
+        else if (COMMAND("PASS"))
+        {
+            fscanf(fd, "%s", arg);
+            if (strcmp(arg, "1234") == 0)
+            {
+                fprintf(fd, "230 User logged in\n");
+            }
+            else
+            {
+                fprintf(fd, "530 Not logged in.\n");
+                quit = true;
+            }
+        }
+        else if (COMMAND("PWD"))
+        {
+        }
         else if (COMMAND("CWD"))
         {
-            fscanf(fd, "%s", command);
+            fscanf(fd, "%s", arg);
             printf("(CWD):%s\n", arg);
 
             char path[MAX_BUFF];
@@ -138,22 +154,7 @@ void ClientConnection::WaitForRequests()
                     fprintf(fd, "250, changed directoy succesfully.\n");
             }
         }
-        else if (COMMAND("PWD"))
-        {
-        }
-        else if (COMMAND("PASS"))
-        {
-            fscanf(fd, "%s", arg);
-            if (strcmp(arg, "1234") == 0)
-            {
-                fprintf(fd, "230 User logged in\n");
-            }
-            else
-            {
-                fprintf(fd, "530 Not logged in.\n");
-                quit = true;
-            }
-        }
+
         else if (COMMAND("PORT"))
         {
             // To be implemented by students
