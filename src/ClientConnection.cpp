@@ -115,9 +115,11 @@ void ClientConnection::WaitForRequests()
     {
 
         fscanf(fd, "%s", command);
+
         if (COMMAND("USER"))
         {
-            fscanf(fd, "%s", arg);
+            printf("USER: %s\n", arg);
+
             fprintf(fd, "331 User name ok, need password\n");
         }
 
@@ -136,6 +138,7 @@ void ClientConnection::WaitForRequests()
         }
         else if (COMMAND("PWD"))
         {
+            printf("PWD: show directory in client\n");
             char path[MAX_BUFF];
 
             if (getcwd(path, sizeof(path)) != NULL)
@@ -144,7 +147,7 @@ void ClientConnection::WaitForRequests()
         else if (COMMAND("CWD"))
         {
             fscanf(fd, "%s", arg);
-            printf("Command CWD recieved: %s as argument.\n", arg);
+            printf("CWD: changing to %s\n", arg);
 
             char path[MAX_BUFF];
 
@@ -178,7 +181,7 @@ void ClientConnection::WaitForRequests()
         }
         else if (COMMAND("PASV"))
         {
-            // To be implemented by students
+            
         }
         else if (COMMAND("STOR"))
         {
