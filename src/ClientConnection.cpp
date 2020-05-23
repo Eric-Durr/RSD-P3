@@ -307,7 +307,38 @@ void ClientConnection::WaitForRequests()
         }
         else if (COMMAND("LIST"))
         {
-            // To be implemented by students
+            printf("(LIST): Listing current directory\n");
+            fprintf(fd, "125 Data connection already open.\n");
+
+            struct sockaddr_in sa;
+            socklen_t sa_len = sizeof(sa);
+            char buffer[MAX_BUFF];
+            std::string list_str;
+
+            FILE* file = popen("ls", "r");
+
+            if (!file)
+            {
+                fprintf(fd, "450 Requested proccess stoped.\n");
+                close(data_socket);
+            }
+
+            else
+            {
+
+                if (p_mode)
+                    data_socket = accept(data_socket,(struct sockaddr *)&sa, &sa_len);
+
+                while (!feof(file))
+                    if (fgets(buffer, MAX_BUFF, file) != NULL) 
+                        list_str.append(buffer);
+
+                send(data_socket, list_str.c_str(), list_str.size(), 0);
+
+                fprintf(fd, "250 Closing data connection.\n");
+                pclose(file);
+                close(data_socket);
+            }
         }
         else if (COMMAND("SYST"))
         {
