@@ -79,7 +79,7 @@ int connect_TCP(uint32_t address, uint16_t port)
     sin.sin_addr.s_addr = address; // Accept connection from address
     sin.sin_port = htons(port);    // Port number
 
-    // if condition below checks if can stablish a connection to the server address
+    // if condition below checks if the socket, in this case "s", connects to de address specified by "sin"
 
     if (connect(s, (struct sockaddr *)&sin, sizeof(sin)) < 0)
         errexit("Unable to connect to %s\n", address, strerror(errno));
