@@ -212,9 +212,43 @@ void ClientConnection::WaitForRequests()
                 close(data_socket);
             }
         }
+
+        /*Retrieve files method (get)*/
         else if (COMMAND("RETR"))
         {
-            // To be implemented by students
+            fscanf(fd, "%s", arg);
+            printf("RETR: Retrieving %s\n", arg);
+
+            FILE* file = fopen(arg,"rb");
+
+            if (!file){
+                fprintf(fd, "450 Impossible to get file. File is unavaible.\n");
+                close(data_socket);
+            }
+
+            else{
+
+                fprintf(fd, "150 File status okay; oppening data connection.\n");
+
+                struct sockaddr_in sa;
+                socklen_t sa_len = sizeof(sa);
+                char buffer[MAX_BUFF];
+                int n;
+
+                if (p_mode)
+                    data_socket = accept(data_socket,(struct sockaddr *)&sa, &sa_len);
+
+                do{
+                    n = fread(buffer, sizeof(char), MAX_BUFF, file); 
+                    send(data_socket, buffer, n, 0);
+
+                } while (n == MAX_BUFF);
+                          
+                fprintf(fd,"226 Closing data connection. Requested file successfully ended.\n");
+                fclose(file);
+                close(data_socket);
+           }
+
         }
         else if (COMMAND("LIST"))
         {
