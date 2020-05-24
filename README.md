@@ -4,10 +4,10 @@ This repository contains the code and report which is done for a introduction in
 
 Access the content with the following links:
 
-- [Code source](./location)
+- [Code source](./src)
 - [Report source](./docs/REPORT.md)
 
 The report and the code were developed by:
 
-- [Éric Dürr Sierra](alu0101027005@ull.edu.es)
-- [Noah Sanchez](alu000000000@ull.edu.es)
+- [Éric Dürr Sierra - alu0101027005@ull.edu.es](https://github.com/EricDS-INFO)
+- [Noah Sanchez - alu0101134956@ull.edu.es](https://github.com/EindhovenLion99)
