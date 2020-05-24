@@ -103,7 +103,11 @@ FTP is the protocol involved in this project, but what is actually FTP?
 
 FTP stands for “File Transfer Protocol.” It’s also one of the oldest protocols in use today, and is a convenient way to move files around. An FTP server offers access to a directory, with sub-directories. Users connect to these servers with an FTP client, a piece of software that lets you download files from the server, as well as upload files to it.
 
+<div style="display: flex; justify-content: center;">
 <img src="images/Esquema.png" alt="500" width="500">
+</div>
+
+
 
 FTP is one of the simplest, and earliest formats created to quickly move files from one device to another. In the 1980s, the FTP format was updated to the TCP/IP version associated with servers.
 
