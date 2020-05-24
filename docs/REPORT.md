@@ -1,8 +1,8 @@
-# Report 3 | Socket Programming (transport layer)
+# Report 3 | Socket Programming (Transport Layer)
 
 Redes y Sistemas Distribuidos - ESIT (Escuela superior de Ingeniería y Tecnología) ULL
 
-![socket front image](./images/)
+![socket front image](images/Portada.jpg)
 
 
 ## **Index** &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;Page:
