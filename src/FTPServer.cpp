@@ -41,7 +41,7 @@ int define_socket_TCP(int port)
     if (s < 0)
         errexit("Unable to create socket: %s\n", strerror(errno)); // Access to common.h function
 
-    memset(&sin, 0, sizeof(sin));
+    memset(&sin, 0, sizeof(sin));    
     sin.sin_family = AF_INET;         // family protocol
     sin.sin_addr.s_addr = INADDR_ANY; // directions which connections are allowed
     sin.sin_port = htons(port);       // Port number
