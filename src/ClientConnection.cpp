@@ -162,7 +162,7 @@ void ClientConnection::WaitForRequests()
 
         else if (COMMAND("LIST"))
         {
-        
+            ListCommand(fd, arg);
         }
 
         else if (COMMAND("SYST"))
