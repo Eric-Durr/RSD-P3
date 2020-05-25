@@ -125,7 +125,7 @@ This document will also include evidences of the teamwork ( as done in previous 
 <br>
 <br>
 
-Once the program is compiled and excuted (instructions above), wa are able to use the ftp server, in wich we can manage multiple commands sucha as:
+Once the program is compiled and excuted (instructions above), wa are able to use the ftp server, in which we can manage multiple commands such as:
 
 * **USER**:
 
@@ -152,7 +152,7 @@ Also it will show the system info (SYST command).
 
 * **PWD**
 
-With this command the user can see where is located.
+With this command the user can see where he is located.
 
 ```
 ftp> pwd
