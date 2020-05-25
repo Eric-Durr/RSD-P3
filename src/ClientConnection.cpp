@@ -35,15 +35,22 @@
 
 ClientConnection::ClientConnection(int s, unsigned long addr)
 {
+    // "sock" storages the socket file descriptor as an integer
     int sock = (int)(s);
 
     char buffer[MAX_BUFF];
     server_addr = addr;
+
+    // Socket is referenced by FD in the atribute control_socket
     control_socket = s;
 
     // Check the Linux man pages to know what fdopen does.
+
+    // We first open a file whose name is the string pointed by the "s"
+    // variable (which must be const char*) (s is a socket File Descriptor)
+    // then the file FD is storaged in fd
     fd = fdopen(s, "a+");
-    if (fd == NULL)
+    if (fd == NULL) //In case that the file doesnt exist we end the socket connection
     {
         std::cout << "Connection closed" << std::endl;
 
@@ -53,10 +60,16 @@ ClientConnection::ClientConnection(int s, unsigned long addr)
         return;
     }
 
+    // If the file is referenced without error the constructor ends
+    // with the right values in the atributes
+
     ok = true;
     data_socket = -1;
     quit = false;
 };
+
+// DESTRUCTOR:    this method closes the file opened using the fd atribute
+//                and closes the control_socket initialized in the constructor
 
 ClientConnection::~ClientConnection()
 {
@@ -64,9 +77,12 @@ ClientConnection::~ClientConnection()
     close(control_socket);
 }
 
+// Function that connects to a port using TCP
+// this receive and address and a port.
+
 int connect_TCP(uint32_t address, uint16_t port)
 {
-    // Implement your code to define a socket here
+    //We create a socket address structure (same process done before in FTPServer)
     struct sockaddr_in sin;
     int s;
 
@@ -80,12 +96,13 @@ int connect_TCP(uint32_t address, uint16_t port)
     sin.sin_addr.s_addr = address; // Accept connection from address
     sin.sin_port = htons(port);    // Port number
 
-    // if condition below checks if the socket, in this case "s", connects to de address specified by "sin"
+    // We execute the connect function for attempt connecting to a socket
+    // (FD of the socket, structure that contains the peer address, length of the address )
 
     if (connect(s, (struct sockaddr *)&sin, sizeof(sin)) < 0)
         errexit("Unable to connect to %s\n", address, strerror(errno));
 
-    return s;
+    return s; // You must return the socket descriptor.
 }
 
 void ClientConnection::stop()
