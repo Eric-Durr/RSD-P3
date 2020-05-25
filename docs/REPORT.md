@@ -227,6 +227,11 @@ To end up the code we made a refactor of each command translating all the action
 
 <br>
 <br>
+
+For a more detailed explanation of each part of the source code you can check for commentaries in the code files. They should be deep explnaied and reffered to the external libraries.
+
+<br>
+<br>
 <br>
 <br>
 
@@ -485,15 +490,3 @@ If the passive mode is not activated, the commands mentioned before will be exec
 <br>
 <br>
 
-
-<div id="id5">
-
-## 5. Appendix: Source code.
-<br>
-<br>
-
-
-<br>
-<br>
-<br>
-<br>
