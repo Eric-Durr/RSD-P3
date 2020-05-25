@@ -125,6 +125,9 @@ This document will also include evidences of the teamwork ( as done in previous 
 <br>
 <br>
 
+Once the code is compiled and executed (instructions above), we are now able to use all the following implemented commands:
+
+Command *USER*: 
 
 <br>
 <br>
