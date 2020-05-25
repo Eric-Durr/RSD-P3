@@ -113,17 +113,20 @@ FTP is one of the simplest, and earliest formats created to quickly move files f
 
 When files are transferred through FTP, one of two actions is happening – uploading or downloading. Uploading involves transferring files from a personal computer to a server. FTP uses TCP/IP, as mencioned before, to transfer your files. TCP/IP is basically the language that the Internet uses to carry out commands.
 
-![socket front image](images/Modelo_ftp.jpg)
-
 FTP may run in active or passive mode, which determines how the data connection is established. In both cases, the client creates a TCP control connection from a random, usually an unprivileged, port N to the FTP server command port 21.
 
-![socket front image](images/Pasivo.png)
 
 In active mode, the client starts listening for incoming data connections from the server on port M. It sends the FTP command PORT M to inform the server on which port it is listening. The server then initiates a data channel to the client from it´s port 20, the FTP server data port.
 
-![socket front image](images/Activo.png)
+<div style="display: flex; justify-content: center;">
+<img src="images/Active.png" alt="300" width="300">
+</div>
 
 In situations where the client is behind a firewall and unable to accept incoming TCP connections, passive mode may be used. In this mode, the client uses the control connection to send a PASV command to the server and then receives a server IP address and server port number from the server, which the client then uses to open a data connection from an arbitrary client port to the server IP address and server port number received.
+
+<div style="display: flex; justify-content: center;">
+<img src="images/Passive.png" alt="300" width="300">
+</div>
 
 Both modes were updated in late nineties to support IPv6. Further changes were introduced to the passive mode at that time, updating it to extended passive mode.
 
