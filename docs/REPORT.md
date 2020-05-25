@@ -296,6 +296,39 @@ Stages of the TCP Client in Socket Programming:
 <br>
 <br>
 
+1. Compiling the server aplication (which is the one we programmed) is as easy as executing the order `make` in a linux terminal command line. This will give an executable of the server named as ***ftp_server***. We must be located in the ***src*** subdirectory of the project repossitory to do this.
+
+if everything ran succesfully the terminal output should look like this:
+```bash
+~$ make 
+   g++ -g -std=gnu++0x  ClientConnection.cpp FTPServer.cpp ftp_server.cpp 
+   -o ftp_server -lpthread
+
+```
+
+2. Once the program was compiled we can leave the server running. To do this we must run the command `./ftp_server` leaving our server working on the background and waiting for a client to connect.
+
+3. To open a client we execute the `ftp` command in a diferent linux terminal, once done we will enter to the ftp command line interface.
+
+4. We must connect our client to the server entering the `open` command in order to open the conection, as arguments we must provide the IP address which is `localhost` and the port `2121` in our case. If all the steps succeeded the command line should look like this:
+
+```bash
+ftp> open localhost 2121
+Connected to localhost.
+220 Service ready
+Name (localhost:user): 
+```
+5. As shown by the terminal the next step is to introduce our username and then our password. If all was right the console should look lie following:
+
+```bash
+331 User name ok, need password
+Password:
+230 User logged in
+Remote system type is UNIX.
+Using binary mode to transfer files.
+ftp>
+```
+6. From here on we will be able to interact with the server through the ftp commands in the server, such as getting files, putting files, showing the current directory, etc.
 
 <br>
 <br>
