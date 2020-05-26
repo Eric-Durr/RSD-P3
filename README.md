@@ -5,7 +5,11 @@ This repository contains the code and report which is done for a introduction in
 Access the content with the following links:
 
 - [Code source](./src)
-- [Report source](./docs/REPORT.md)
+- [Report source in markdown](./docs/REPORT.md)
+- [Report source in pdf](./docs/REPORT.pdf)
+- [Assignment statement source](./docs/assignment.pdf)
+- [RFC 959 source](./docs/rfc959.pdf)
+
 
 The report and the code were developed by:
 
