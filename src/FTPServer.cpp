@@ -69,7 +69,7 @@ int define_socket_TCP(int port)
 
 // This function is executed when the thread is executed
 // and is used to create a "ClientConnection" object
-// that executes the method that listens the requests.
+// which runs the method that listens the requests.
 void *run_client_connection(void *c)
 {
     ClientConnection *connection = (ClientConnection *)c;

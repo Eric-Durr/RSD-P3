@@ -33,9 +33,11 @@
 
 #include "ClientConnection.h"
 
+//  CONSTRUCTOR:    initiates the atributes values and opens a stream to the 
+//                  server socket file descriptor
 ClientConnection::ClientConnection(int s, unsigned long addr)
 {
-    // "sock" storages the socket file descriptor as an integer
+    // "sock" storages the socket file descriptor as an integer (it could come with another type)
     int sock = (int)(s);
 
     char buffer[MAX_BUFF];
@@ -47,10 +49,10 @@ ClientConnection::ClientConnection(int s, unsigned long addr)
     // Check the Linux man pages to know what fdopen does.
 
     // We first open a file whose name is the string pointed by the "s"
-    // variable (which must be const char*) (s is a socket File Descriptor)
+    // variable and associating a stream (which must be const char*) (s is a socket File Descriptor)
     // then the file FD is storaged in fd
     fd = fdopen(s, "a+");
-    if (fd == NULL) //In case that the file doesnt exist we end the socket connection
+    if (fd == NULL) //In case that the file doesn't exist we end the socket connection
     {
         std::cout << "Connection closed" << std::endl;
 
@@ -68,8 +70,8 @@ ClientConnection::ClientConnection(int s, unsigned long addr)
     quit = false;
 };
 
-// DESTRUCTOR:    this method closes the file opened using the fd atribute
-//                and closes the control_socket initialized in the constructor
+//  DESTRUCTOR:     this method closes the file opened using the fd atribute
+//                  and closes the control_socket initialized in the constructor
 
 ClientConnection::~ClientConnection()
 {
@@ -91,6 +93,7 @@ int connect_TCP(uint32_t address, uint16_t port)
     if (s < 0)
         errexit("Unable to create socket: %s\n", strerror(errno));
 
+    // We store the client socket address in the following lines
     memset(&sin, 0, sizeof(sin));
     sin.sin_family = AF_INET;
     sin.sin_addr.s_addr = address; // Accept connection from address
@@ -98,7 +101,7 @@ int connect_TCP(uint32_t address, uint16_t port)
 
     // We execute the connect function for attempt connecting to a socket
     // (FD of the socket, structure that contains the peer address, length of the address )
-
+    // The server will be listening for this connection.
     if (connect(s, (struct sockaddr *)&sin, sizeof(sin)) < 0)
         errexit("Unable to connect to %s\n", address, strerror(errno));
 
@@ -112,6 +115,7 @@ void ClientConnection::stop()
     quit = true;
 }
 
+//this line will store the commands in order to read and filter them
 #define COMMAND(cmd) strcmp(command, cmd) == 0
 
 // This method processes the requests.
@@ -317,14 +321,14 @@ void ClientConnection::PortCommand(FILE *&fd, char arg[MAX_BUFF])
     p_mode = false;
 
     unsigned int ip[4];
-    unsigned int port[2];
+    unsigned int p[2];
 
-    fscanf(fd, "%d, %d, %d, %d, %d, %d", &ip[0], &ip[1], &ip[2], &ip[3], &port[0], &port[1]);
+    fscanf(fd, "%d, %d, %d, %d, %d, %d", &ip[0], &ip[1], &ip[2], &ip[3], &p[0], &p[1]);
 
     uint32_t ip_addr = ip[3] << 24 | ip[2] << 16 | ip[1] << 8 | ip[0];
-    uint16_t port_v = port[0] << 8 | port[1];
+    uint16_t port = p[0] << 8 | p[1];
 
-    data_socket = connect_TCP(ip_addr, port_v);
+    data_socket = connect_TCP(ip_addr, port);
 
     fprintf(fd, "200 Ok\n");
 }
@@ -357,12 +361,12 @@ void ClientConnection::PasvCommand(FILE *&fd, char arg[MAX_BUFF])
     getsockname(sFD, (struct sockaddr *)&sa, &sa_len);
 
     fprintf(fd, "227 Entering Passive Mode (%d,%d,%d,%d,%d,%d).\n",
-            (unsigned int)(server_addr & 0xff),
-            (unsigned int)((server_addr >> 8) & 0xff),
-            (unsigned int)((server_addr >> 16) & 0xff),
-            (unsigned int)((server_addr >> 24) & 0xff),
-            (unsigned int)(sa.sin_port & 0xff),
-            (unsigned int)(sa.sin_port >> 8));
+                                (unsigned int)(server_addr & 0xff),
+                                (unsigned int)((server_addr >> 8) & 0xff),
+                                (unsigned int)((server_addr >> 16) & 0xff),
+                                (unsigned int)((server_addr >> 24) & 0xff),
+                                (unsigned int)(sa.sin_port & 0xff),
+                                (unsigned int)(sa.sin_port >> 8));
 
     data_socket = sFD;
 }
