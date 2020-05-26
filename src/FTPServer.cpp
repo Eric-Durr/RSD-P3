@@ -44,17 +44,10 @@ int define_socket_TCP(int port)
     if (s < 0)
         errexit("Unable to create socket: %s\n", strerror(errno)); // Access to common.h function
 
-<<<<<<< HEAD
     memset(&sin, 0, sizeof(sin));     // Sets the first (sin size) bytes of the block memory pointed by sin to 0
     sin.sin_family = AF_INET;         // The family variable of the structure contains the net family for the socket
     sin.sin_addr.s_addr = INADDR_ANY; // The IP address is initialized as ANY value in order to pick the firs avalaible
     sin.sin_port = htons(port);       // Then the port is storaged in the address struct with h to ns in order to translate it to network byte type from host byte type
-=======
-    memset(&sin, 0, sizeof(sin));    
-    sin.sin_family = AF_INET;         // family protocol
-    sin.sin_addr.s_addr = INADDR_ANY; // directions which connections are allowed
-    sin.sin_port = htons(port);       // Port number
->>>>>>> Report
 
     // Then, bind will associate the socket FD to an address
     // the call must success in order to continue so we check if it returns
